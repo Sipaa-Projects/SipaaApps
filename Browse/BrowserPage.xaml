@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Page
+    x:Class="Browse.BrowserPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:Browse"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d">
+    <Grid x:Name="mainGrid">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="48"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <Grid VerticalAlignment="Top" Height="48" Padding="6, 0, 0, 0" Background="{ThemeResource LayerOnAccentAcrylicFillColorDefault}">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="44"/>
+                <ColumnDefinition Width="44"/>
+                <ColumnDefinition Width="44"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="44"/>
+            </Grid.ColumnDefinitions>
+
+            <Button x:Name="backButton" VerticalAlignment="Center" Grid.Column="0" Height="34" Margin="0" Click="backButton_Click" BorderThickness="0" Background="Transparent">
+                <FontIcon Glyph="&#xE72B;" FontSize="12"/>
+            </Button>
+
+            <Button x:Name="forwardButton" VerticalAlignment="Center" Grid.Column="1" Height="34" Margin="0" Click="forwardButton_Click" BorderThickness="0" Background="Transparent">
+                <FontIcon Glyph="&#xE72A;" FontSize="12"/>
+            </Button>
+
+            <Button x:Name="refreshButton" VerticalAlignment="Center" Grid.Column="2" Height="34" Margin="0" Click="refreshButton_Click" BorderThickness="0" Background="Transparent">
+                <FontIcon Glyph="&#xE72C;" FontSize="12"/>
+            </Button>
+
+            <TextBox x:Name="addressBar" VerticalAlignment="Center" Grid.Column="3" Margin="0" KeyDown="AddressBar_KeyDown"/>
+
+            <Button x:Name="moreMenuButton" VerticalAlignment="Center" Grid.Column="4" Height="34" Margin="6, 0" BorderThickness="0" Background="Transparent">
+                <Button.Flyout>
+                    <MenuFlyout>
+                        <MenuFlyoutItem x:Name="downloadMenuFlyoutItem" Text="Downloads" Click="downloadMenuFlyoutItem_Click">
+                            <MenuFlyoutItem.Icon>
+                                <FontIcon Glyph="&#xE896;"/>
+                            </MenuFlyoutItem.Icon>
+                            <MenuFlyoutItem.KeyboardAccelerators>
+                                <KeyboardAccelerator Modifiers="Control" Key="J"/>
+                            </MenuFlyoutItem.KeyboardAccelerators>
+                        </MenuFlyoutItem>
+                        <MenuFlyoutSubItem x:Name="advancedMenuFlyoutItem" Text="Advanced">
+                            <MenuFlyoutItem x:Name="devToolsMenuFlyoutItem" Text="DevTools" Click="devToolsMenuFlyoutItem_Click">
+                                <MenuFlyoutItem.Icon>
+                                    <FontIcon Glyph="&#xE943;"/>
+                                </MenuFlyoutItem.Icon>
+                                <MenuFlyoutItem.KeyboardAccelerators>
+                                    <KeyboardAccelerator Key="F12"/>
+                                </MenuFlyoutItem.KeyboardAccelerators>
+                            </MenuFlyoutItem>
+                            <MenuFlyoutItem x:Name="flagsMenuItemFlyout" Text="Browser Flags" Click="flagsMenuItemFlyout_Click"/>
+                            <MenuFlyoutSubItem x:Name="browseTestDebugFlyoutItem" Text="BrowseExperiments">
+                                <MenuFlyoutItem x:Name="openDownloadPopupFlyoutItem" Text="OpenDownloadPopup" Click="openDownloadPopupFlyoutItem_Click"/>
+                            </MenuFlyoutSubItem>
+                        </MenuFlyoutSubItem>
+                        <MenuFlyoutItem x:Name="settingsMenuFlyoutItem" Text="Settings" Click="settingsMenuFlyoutItem_Click">
+                            <MenuFlyoutItem.Icon>
+                                <FontIcon Glyph="&#xE713;"/>
+                            </MenuFlyoutItem.Icon>
+                        </MenuFlyoutItem>
+                    </MenuFlyout>
+                </Button.Flyout>
+                <FontIcon Glyph="&#xE700;" FontSize="12"/>
+            </Button>
+        </Grid>
+
+        <WebView2 Grid.Row="1" x:Name="br" Source="https://www.bing.com" Margin="0, 0, 0, 0"/>
+    </Grid>
+</Page>

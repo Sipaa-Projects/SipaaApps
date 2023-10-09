@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Window
+    x:Class="Browse.DownloadPopup"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:Browse"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d">
+    <Window.SystemBackdrop>
+        <MicaBackdrop/>
+    </Window.SystemBackdrop>
+    <Grid>
+        <Grid x:Name="AppTitleBar" Height="32" VerticalAlignment="Top">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition x:Name="LeftPaddingColumn" Width="0"/>
+                <ColumnDefinition/>
+                <ColumnDefinition x:Name="RightPaddingColumn" Width="0"/>
+            </Grid.ColumnDefinitions>
+            <Image x:Name="TitleBarIcon" Source="/Assets/StoreLogo.png"
+           Grid.Column="1"
+           HorizontalAlignment="Left"
+           Width="16" Height="16"
+           Margin="16,0,0,0"/>
+            <TextBlock x:Name="TitleTextBlock" 
+               Text="Downloading..." 
+               Style="{StaticResource CaptionTextBlockStyle}"
+               Grid.Column="1"
+               VerticalAlignment="Center"
+               Margin="40,0,0,0"/>
+        </Grid>
+        <ProgressBar x:Name="progress" x:FieldModifier="public" IsIndeterminate="True" Margin="20, 50, 20, 0" VerticalAlignment="Top"/>
+        <TextBlock x:Name="receivedBytesLabel" x:FieldModifier="public" Margin="20, 60, 20, 0" VerticalAlignment="Top">8mb</TextBlock>
+        <TextBlock x:Name="totalBytesLabel" x:FieldModifier="public" Margin="20, 60, 20, 0" HorizontalAlignment="Right" VerticalAlignment="Top">Undeterminate</TextBlock>
+        <Expander
+            IsExpanded="False"
+            ExpandDirection="Down"
+            VerticalAlignment="Top"
+            HorizontalAlignment="Stretch"
+            HorizontalContentAlignment="Left"
+            Margin="20, 90, 20, 0">
+            <Expander.Header>
+                <Grid>
+                    <FontIcon HorizontalAlignment="Left" Glyph="&#xE8A5;" FontSize="13" Margin="0, 0"/>
+                    <TextBlock Margin="25, 0">More</TextBlock>
+                </Grid>
+            </Expander.Header>
+            <Expander.Content>
+                <Grid HorizontalAlignment="Left" VerticalAlignment="Top">
+                    <TextBlock Margin="0, 0, 0, 0" x:Name="fileName" x:FieldModifier="public">File name : sipaakernel_v8.iso</TextBlock>
+                    <TextBlock Margin="0, 20, 0, 0" x:Name="DownloadSpeed" x:FieldModifier="public">Download speed : 8mb/s</TextBlock>
+                    <Button Margin="0, 45, 0, 0" x:FieldModifier="public" x:Name="showDirBtn">Show in directory</Button>
+                    <Button Margin="140, 45, 0, 0" x:FieldModifier="public" x:Name="pauseBtn">Pause</Button>
+                    <Button Margin="208, 45, 0, 0" x:FieldModifier="public" x:Name="cancelBtn">Cancel</Button>
+                </Grid>
+            </Expander.Content>
+        </Expander>
+    </Grid>
+</Window>
