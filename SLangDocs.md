@@ -43,13 +43,13 @@ In SLang, every line of code must finish with ;.
 If you aren't sure about control flows, there must be only 1 ';' at the end.
 
 Example:
-\```slang
+```
 if (<expression>) {
     <body>
 } else {
     <body>
 };
-\```
+```
 
 ---
 
@@ -57,9 +57,9 @@ if (<expression>) {
 
 Variables are declared and initialized as follows:
 
-\```slang
-<name> = <value>;
-\```
+```
+<name = <value>;
+```
 
 ---
 
@@ -74,9 +74,9 @@ Supported operators are:
 
 Example:
 
-\```slang
+```c
 int result = 10 + 20;
-\```
+```
 
 ---
 
@@ -86,29 +86,29 @@ SLang supports `if`, `else` and `while` statements.
 
 - **If Statement**
 
-\```slang
+```c
 if (condition) {
     // Do something
 };
-\```
+```
 
 - **If-Else Statement**
 
-\```slang
+```c
 if (condition) {
     // Do something
 } else {
     // Do something else
 };
-\```
+```
 
 - **While Loop**
 
-\```slang
+```c
 while (condition) {
     // Do something
 };
-\```
+```
 
 ---
 
@@ -116,17 +116,17 @@ while (condition) {
 
 You can define and call functions as follows:
 
-\```slang
+```c
 def myFunction(arg1, arg2) {
     // Do something
 }
-\```
+```
 
 Calling a function:
 
-\```slang
+```c
 myFunction(10, "Hello");
-\```
+```
 
 ---
 
@@ -139,14 +139,14 @@ SLang offers built-in functions for common operations.
 
 Example:
 
-\```slang
+```c
 printc("Hello", " ", "world!");
-\```
+```
 
 Result:
-\```
+```
 Hello world!
-\```
+```
 
 ---
 
@@ -154,9 +154,9 @@ Hello world!
 
 SLang supports single-line comments with `//`.
 
-\```slang
+```c
 // This is a comment
-\```
+```
 
 ---
 
@@ -164,7 +164,7 @@ SLang supports single-line comments with `//`.
 
 Here's an example code snippet that shows off various SLang features:
 
-\```slang
+```c
 // Declare variables
 int a = 10;
 float b = 20.5;
@@ -182,6 +182,6 @@ if (sum > 10) {
 
 // Function call
 printrt();
-\```
+```
 
 That should give you a good starting point for understanding the core functionalities of SLang.
