@@ -6,7 +6,7 @@
 
 SLang is a simple, yet powerful, programming language designed for ease-of-use and rapid development. This documentation will guide you through his core features and functionalities.
 
-This documentation has been wrote for the runtime v0.5
+This documentation has been wrote for the runtime v0.5.1
 
 ---
 
@@ -119,8 +119,19 @@ You can define and call functions as follows:
 ```c
 def myFunction(arg1, arg2) {
     // Do something
-}
+};
 ```
+
+Functions can also return values:
+
+```c
+def myFunction(arg1, arg2) {
+    // Do something
+    return arg1 + arg2;
+};
+printc(myFunction(1, 4));
+```
+Result : `5`
 
 Calling a function:
 

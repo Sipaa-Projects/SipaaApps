@@ -91,6 +91,8 @@ namespace SLang.Runtime
             else if (parentRuntime != null)
                 if (parentRuntime.Variables.ContainsKey(trimmedValue))
                     return parentRuntime.Variables[trimmedValue];
+                else if (parentRuntime.IsFunctionCall(trimmedValue))
+                    return parentRuntime.ExecuteFunction(trimmedValue);
                 else
                     throw new("Value isn't recognized");
             else

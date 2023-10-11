@@ -9,8 +9,8 @@ namespace SLang.Runtime
     public class SLRuntime
     {
         public Dictionary<string, object> Variables { get; set; }
-        public Dictionary<string, Action<object[]>> Functions { get; set; }
-        public Dictionary<string, Func<object[], object>> UserFunctions { get; set; }
+        public Dictionary<string, Func<object[], object>> Functions = new Dictionary<string, Func<object[], object>>();
+
         public Parser parser;
 
         public SLRuntime() 
@@ -74,6 +74,44 @@ namespace SLang.Runtime
         // ----------------------
         // Execution Functions
         // ----------------------
+        public void ExecuteFile(string path)
+        {
+            string[] file = File.ReadAllLines(path);
+
+            StringBuilder multiLineBuffer = new StringBuilder();
+            bool isMultiLine = false;
+
+            for (int i = 0; i < file.Length; i++)
+            {
+                string line = file[i];
+
+                if (line.EndsWith("{"))
+                {
+                    isMultiLine = true;
+                    multiLineBuffer.Append(line + " ");
+                }
+                else if (line.EndsWith("}") || line.EndsWith("};"))
+                {
+                    isMultiLine = false;
+                    multiLineBuffer.Append(line);
+                    string singleLineCode = multiLineBuffer.ToString();
+                    multiLineBuffer.Clear();
+
+                    ExecuteLine(singleLineCode);
+                }
+                else
+                {
+                    if (isMultiLine)
+                    {
+                        multiLineBuffer.Append(line + " ");
+                    }
+                    else
+                    {
+                        ExecuteLine(line);  // Assuming slRuntime is your SLRuntime instance
+                    }
+                }
+            }
+        }
         public void ExecuteIfElseStatement(string inlineStatement)
         {
             string[] parts = inlineStatement.Split(new[] { "elseif", "else" }, StringSplitOptions.None);
@@ -89,7 +127,7 @@ namespace SLang.Runtime
                 }
                 else if (part.StartsWith("else"))
                 {
-                    ExecuteBlock(parser.ExtractBlock(part));
+                    ExecuteBlock(parser.ExtractBlock(part), out object temp);
                     return;
                 }
                 else  // this is an "elseif"
@@ -105,22 +143,34 @@ namespace SLang.Runtime
         public bool ExecuteIfStatement(string ifStatement)
         {
             string condition = parser.ExtractCondition(ifStatement);
-            if (IsConditionTrue(condition))
+            if (parser.IsConditionTrue(condition))
             {
-                ExecuteBlock(parser.ExtractBlock(ifStatement));
+                ExecuteBlock(parser.ExtractBlock(ifStatement), out object temp);
                 return true;
             }
             return false;
         }
-
-        public void ExecuteBlock(string block)
+        public void ExecuteBlock(string block, out object returnValue)
         {
+            returnValue = null; // Initialize to null
             var lines = block.Split(new[] { ";" }, StringSplitOptions.RemoveEmptyEntries);
+
             foreach (var line in lines)
             {
-                ExecuteLine(line + ";");
+                // If a "return" statement is encountered, set the returnValue and break
+                if (line.StartsWith("return "))
+                {
+                    string returnExpression = line.Substring(7).Trim(); // Remove "return " keyword
+                    returnValue = parser.ParseValue(returnExpression); // Assume EvaluateExpression returns an object
+                    break; // Exit the block after a return statement
+                }
+                else
+                {
+                    ExecuteLine(line + ";");
+                }
             }
         }
+
         public void ExecuteAssignment(string line)
         {
             string[] tokens = line.Split('=', StringSplitOptions.TrimEntries);
@@ -143,15 +193,21 @@ namespace SLang.Runtime
             if (!IsValidLineSyntax(line))
                 throw new Exception("Lines must finish with ';' character.");
 
+            Debug.WriteLine($"slrt: Executing line '{line}'...");
+
             line = RemoveEndingSemicolon(line);
 
-            if (IsAssignment(line) && !IsFunctionCall(line) && !IsWhileLoop(line) && !IsIfStatement(line))
+            if (IsAssignment(line) && !IsWhileLoop(line) && !IsIfStatement(line))
             {
                 ExecuteAssignment(line);
             }
             else if (IsFunctionCall(line))
             {
                 ExecuteFunction(line);
+            }
+            else if (IsUserFunctionDefinition(line))
+            {
+                DefineFunction(line);
             }
             else if (IsWhileLoop(line))
             {
@@ -185,9 +241,9 @@ namespace SLang.Runtime
             string loopBody = line.Substring(firstBrace + 1, lastBrace - firstBrace - 1).Trim();
 
             Debug.WriteLine($"slrt: while loop: condition: {condition}, body: {loopBody}");
-            while (IsConditionTrue(condition))
+            while (parser.IsConditionTrue(condition))
             {
-                ExecuteBlock(loopBody);
+                ExecuteBlock(loopBody, out object temp);
             }
         }
 
@@ -209,10 +265,12 @@ namespace SLang.Runtime
 
             Functions[funcName] = (args) =>
             {
-                // Validate args length, assign them to Variables, execute the body
+                object returnValue = null;  // Initialize a returnValue to null
+
                 if (args.Length != paramsList.Length)
                 {
-                    throw new("Argument length mismatch");
+                    throw new($"Argument length mismatch...");
+                    // existing code
                 }
 
                 Dictionary<string, object> tempVariables = new();
@@ -225,61 +283,68 @@ namespace SLang.Runtime
                 Variables = tempVariables;
 
                 // Execute body
-                ExecuteBlock(body);
+                ExecuteBlock(body, out returnValue);
 
                 Variables = originalVariables;
 
-                //return null; // Or return value, if your language supports that
+                return returnValue;  // Return the value
             };
 
             Debug.WriteLine($"slrt: Sucessfully defined function '{funcName}'");
         }
-        public void ExecuteFunction(string line)
+
+        public object ExecuteFunction(string line)
         {
             string functionName = line.Substring(0, line.IndexOf('('));
             string argsString = line.Substring(line.IndexOf('(') + 1, line.LastIndexOf(')') - line.IndexOf('(') - 1);
-
             List<string> argsList = new List<string>();
             StringBuilder currentArg = new StringBuilder();
-            bool insideString = false;
 
-            for (int i = 0; i < argsString.Length; i++)
+            if (!string.IsNullOrWhiteSpace(argsString))
             {
-                char c = argsString[i];
+                bool insideString = false;
 
-                if (c == '"' && (i == 0 || argsString[i - 1] != '\\'))
+                for (int i = 0; i < argsString.Length; i++)
                 {
-                    insideString = !insideString;
-                }
+                    char c = argsString[i];
 
-                if (c == ',' && !insideString)
+                    if (c == '"' && (i == 0 || argsString[i - 1] != '\\'))
+                    {
+                        insideString = !insideString;
+                    }
+
+                    if (c == ',' && !insideString)
+                    {
+                        argsList.Add(currentArg.ToString().Trim());
+                        currentArg.Clear();
+                    }
+                    else
+                    {
+                        currentArg.Append(c);
+                    }
+                }
+                if (currentArg.Length > 0)
                 {
                     argsList.Add(currentArg.ToString().Trim());
-                    currentArg.Clear();
-                }
-                else
-                {
-                    currentArg.Append(c);
                 }
             }
 
-            argsList.Add(currentArg.ToString().Trim());
             object[] args = argsList.Select(arg => parser.ParseValue(arg)).ToArray();
 
             if (Functions.ContainsKey(functionName))
             {
-                Functions[functionName](args);
+                return Functions[functionName](args);
             }
             else
             {
-                throw new Exception("Function doesn't exist");
+                throw new Exception($"Function doesn't exist! Function name: {functionName}");
             }
         }
 
         // ----------------------
         // Core Functions
         // ----------------------
-        private void PrintRTContent(object[] args)
+        private object PrintRTContent(object[] args)
         {
             Console.WriteLine("SLang Runtime\n\nVariables:");
             foreach (var v in Variables)
@@ -299,12 +364,14 @@ namespace SLang.Runtime
             {
                 Console.WriteLine($"name: {v.Key}, type: func, value: 0x{v.Value.Method.MethodHandle.Value.ToInt64().ToString("X")}");
             }
+            return true;
         }
-        private void PrintConcat(object[] args)
+        private object PrintConcat(object[] args)
         {
             foreach (object arg in args)
                 Console.Write(arg);
             Console.Write('\n');
+            return true;
         }
 
     }
