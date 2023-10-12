@@ -1,9 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using SLang.Runtime;
 using System.Diagnostics;
 using System.Reflection;
 using System.Text;
-using SLang.Runtime;
 
 namespace SLang
 {
@@ -30,7 +28,7 @@ namespace SLang
         {
             rt = new();
             bool isREPL = false;
-            if (Verbose) 
+            if (Verbose)
             {
                 Trace.Listeners.Add(new ConsoleTraceListener());
                 Debug.AutoFlush = true;

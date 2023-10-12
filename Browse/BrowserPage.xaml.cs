@@ -1,15 +1,11 @@
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
-using Microsoft.UI.Xaml.Data;
 using Microsoft.UI.Xaml.Input;
 using Microsoft.Web.WebView2.Core;
 using System;
 using System.Diagnostics;
 using System.IO;
 using System.Net.Http;
-using System.Threading.Tasks;
-using Windows.Data.Xml.Dom;
-using Windows.UI.Notifications;
 
 // To learn more about WinUI, the WinUI project structure,
 // and more about our project templates, see: http://aka.ms/winui-project-info.
@@ -186,7 +182,7 @@ namespace Browse
         {
             ParentTabViewer.AddNewSettingsTab();
         }
-        
+
         private void openDownloadPopupFlyoutItem_Click(object sender, RoutedEventArgs e)
         {
             new DownloadPopup().Activate();

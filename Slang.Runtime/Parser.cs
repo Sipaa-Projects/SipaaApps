@@ -1,9 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using SLang.Runtime.Types;
 using System.Diagnostics;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace SLang.Runtime
 {
@@ -86,6 +83,11 @@ namespace SLang.Runtime
                     return hexValue;
                 else
                     throw new("Hexadecimal value isn't recognized");
+            else if (trimmedValue.EndsWith("iptr"))
+                if (int.TryParse(trimmedValue.Remove(trimmedValue.Length - 4, 4), out int iptrValue))
+                    return new IntPtr(iptrValue);
+                else
+                    throw new("Value isn't recognized");
             else if (trimmedValue.StartsWith("\"") && trimmedValue.EndsWith("\""))
                 return UnescapeString(valueString.Substring(1, trimmedValue.Length - 2));
             else if (trimmedValue == "true")
@@ -95,8 +97,8 @@ namespace SLang.Runtime
             else if (trimmedValue == "null")
                 return null;
             else if (parentRuntime != null)
-                if (parentRuntime.Variables.ContainsKey(trimmedValue))
-                    return parentRuntime.Variables[trimmedValue];
+                if (parentRuntime.Variables.GetFromKey(trimmedValue) != null)
+                    return parentRuntime.Variables.GetFromKey(trimmedValue);
                 else if (parentRuntime.IsFunctionCall(trimmedValue))
                     return parentRuntime.ExecuteFunction(trimmedValue);
                 else
@@ -200,10 +202,11 @@ namespace SLang.Runtime
                 return Convert.ToDouble(ParseValue(parts[0].Trim())) < Convert.ToDouble(ParseValue(parts[1].Trim()));
             }
 
-            if (parentRuntime != null) { 
+            if (parentRuntime != null)
+            {
                 if (parentRuntime.Variables.ContainsKey(condition))
                 {
-                    object val = parentRuntime.Variables[condition];
+                    object val = parentRuntime.Variables.GetFromKey(condition);
                     if (val is bool b)
                     {
                         return negate ? !b : b;
@@ -234,7 +237,7 @@ namespace SLang.Runtime
 
         public object EvaluateExpression(string expr)
         {
-            char[] operators = { '+', '-', '*', '/' };
+            char[] operators = { '+', '-', '*', '/', '|' };
             string[] logicOps = { "==", "||", "&&", "!=", ">=", "<=", ">", "<" };
 
             foreach (char op in operators)
@@ -300,7 +303,7 @@ namespace SLang.Runtime
                     }
                 }
             }
-            
+
             foreach (string op in logicOps)
             {
                 if (expr.Contains(op))

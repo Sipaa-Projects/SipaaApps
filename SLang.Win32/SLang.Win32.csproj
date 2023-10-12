@@ -1,17 +1,20 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <OutputType>Exe</OutputType>
     <TargetFramework>net6.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-    <Version>1.1.0</Version>
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Microsoft.Windows.CsWin32" Version="0.3.49-beta">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\Slang.Runtime\SLang.Runtime.csproj" />
-    <ProjectReference Include="..\SLang.TestLibrary\SLang.TestLibrary.csproj" />
-    <ProjectReference Include="..\SLang.Win32\SLang.Win32.csproj" />
   </ItemGroup>
 
 </Project>

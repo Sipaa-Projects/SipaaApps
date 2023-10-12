@@ -1,6 +1,6 @@
-﻿using System.Collections;
+﻿using SLang.Runtime.Types;
+using System.Collections;
 using System.Diagnostics;
-using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
 
@@ -11,12 +11,12 @@ namespace SLang.Runtime
     /// </summary>
     public class SLRuntime
     {
-        public Dictionary<string, object> Variables { get; set; }
+        public List<SLVariable> Variables { get; set; }
         public Dictionary<string, Func<object[], object>> Functions { get; set; }
 
         public Parser Parser { get; set; }
 
-        public SLRuntime() 
+        public SLRuntime()
         {
             Variables = new();
             Functions = new();
@@ -67,9 +67,13 @@ namespace SLang.Runtime
 
         public bool IsAssignment(string line)
         {
-            return line.Contains("=");
+            return line.Contains("=") || line.Contains("++") || line.Contains("--");
         }
-
+        public bool DoesFileHaveMFTW(string filePath)
+        {
+            string zoneIdentifierPath = filePath + ":Zone.Identifier";
+            return File.Exists(zoneIdentifierPath);
+        }
         public bool IsIfStatement(string line)
         {
             return line.StartsWith("if ");
@@ -83,11 +87,19 @@ namespace SLang.Runtime
             return line.Substring(0, line.Length - 1);
         }
 
+
         // ----------------------
         // Execution Functions
         // ----------------------
         public void ExecuteFile(string path)
         {
+            if (DoesFileHaveMFTW(path))
+            {
+                Console.WriteLine("WARNING: The file you are trying to open has Mark of the Web.\nThe execution of this file could lead to problems.\nDo you still want to execute this file? (y/n)");
+                if (Console.ReadLine().ToLower() != "y")
+                    return;
+            }
+
             string[] file = File.ReadAllLines(path);
 
             StringBuilder multiLineBuffer = new StringBuilder();
@@ -174,7 +186,7 @@ namespace SLang.Runtime
                 throw new Exception($"The collection '{collectionName}' is not defined.");
             }
 
-            object collection = Variables[collectionName];
+            object collection = Variables.GetFromKey(collectionName);
             if (!(collection is IEnumerable))
             {
                 throw new Exception($"The variable '{collectionName}' is not a collection.");
@@ -183,7 +195,7 @@ namespace SLang.Runtime
             foreach (object item in (IEnumerable)collection)
             {
                 // Assign the current item to the loop variable
-                Variables[variableName] = item;
+                Variables.SetKeyValue(variableName, item);
 
                 // Execute the loop body
                 ExecuteBlock(loopBody, out object temp, true);
@@ -196,7 +208,7 @@ namespace SLang.Runtime
             if (line.EndsWith(";"))
                 line = line.Substring(0, line.Length - 1);  // Remove the trailing semicolon
 
-            Debug.WriteLine($"Raw line: {line}"); 
+            Debug.WriteLine($"Raw line: {line}");
 
             int startOfForCondition = line.IndexOf("(") + 1;
             int endOfForCondition = line.IndexOf(")") - startOfForCondition;
@@ -260,16 +272,62 @@ namespace SLang.Runtime
 
         public void ExecuteAssignment(string line)
         {
-            string[] tokens = line.Split('=', StringSplitOptions.TrimEntries);
-            if (tokens.Length == 2)
+            if (line.Contains('='))
             {
-                string variableName = tokens[0].Trim();
-                string value = tokens[1].Trim();
-                Variables[variableName] = Parser.ParseValue(value);
+                string[] tokens = line.Split('=', StringSplitOptions.TrimEntries);
+                if (tokens.Length == 2)
+                {
+                    string variableName = tokens[0].Trim();
+                    string value = tokens[1].Trim();
+                    Variables.SetKeyValue(variableName, Parser.ParseValue(value));
+                }
+                else
+                {
+                    throw new("Value isn't recognized");
+                }
             }
-            else
+            else if (line.EndsWith("++") || line.EndsWith("--"))
             {
-                throw new("Value isn't recognized");
+                string variableName = line.Remove(line.Length - 2, 2);
+                if (Variables.ContainsKey(variableName))
+                {
+                    object value = Variables.GetFromKey(variableName);
+                    if (value is int)
+                    {
+                        int intValue = (int)value;
+                        if (line.EndsWith("++"))
+                            intValue++;
+                        else
+                            intValue--;
+
+                        Variables.SetKeyValue(variableName, intValue);
+                    }
+                    else if (value is double)
+                    {
+                        double doubleValue = (double)value;
+                        if (line.EndsWith("++"))
+                            doubleValue++;
+                        else
+                            doubleValue--;
+
+                        Variables.SetKeyValue(variableName, doubleValue);
+                    }
+                    else if (value is float)
+                    {
+                        float floatValue = (float)value;
+                        if (line.EndsWith("++"))
+                            floatValue++;
+                        else
+                            floatValue--;
+
+                        Variables.SetKeyValue(variableName, floatValue);
+                    }
+                    else
+                    {
+                        // Handle the case where the variable is not one of the expected number types
+                        throw new Exception($"Variable '{variableName}' is not a supported numeric type for increment/decrement operations.");
+                    }
+                }
             }
         }
         public void ExecuteLine(string line, bool disableValidLineRequirement = false)
@@ -368,10 +426,10 @@ namespace SLang.Runtime
                     // existing code
                 }
 
-                Dictionary<string, object> tempVariables = new();
+                List<SLVariable> tempVariables = new();
                 for (int i = 0; i < paramsList.Length; i++)
                 {
-                    tempVariables[paramsList[i]] = args[i];
+                    tempVariables.SetKeyValue(paramsList[i], args[i]);
                 }
 
                 var originalVariables = Variables;
@@ -441,75 +499,16 @@ namespace SLang.Runtime
         // ----------------------
         private object Load(object[] args)
         {
-            // TODO: add support for importing .NET classes into SLang (yes it's crazy)
-
             if (args.Length > 0)
             {
                 if (args[0].GetType() == typeof(string))
                 {
-                    try
-                    {
-                        // Path checks
-                        string path = (string)args[0];
-                        Debug.WriteLine($"slrt: Starting loading of assembly '{path}'.");
-                        if (!path.Contains(":\\")) {
-                            Debug.WriteLine("slrt: Path isn't absolute, making it absolute.");
-                            path = AppDomain.CurrentDomain.BaseDirectory + path;
-                            Debug.WriteLine($"slrt: Path became '{path}'.");
-                        }
-
-                        Assembly a = Assembly.LoadFile(path);
-                        bool IsSLLib = false;
-                        Type slMeta = null;
-
-                        // Check if it's a SLang library
-                        foreach (Type type in a.GetTypes())
-                        {
-                            if (type.Name == "SLMetadata")
-                            {
-                                IsSLLib = true;
-                                slMeta = type;
-                                Debug.WriteLine($"slrt: S# Library detected! Library metadata type: {slMeta.FullName}");
-                            }
-                        }
-
-                        // If it's a SLang library, then try running the function to load it
-                        if (IsSLLib && slMeta != null)
-                        {
-                            object instance = null;
-                            MethodInfo methodInfo = slMeta.GetMethod("LibLoad");
-                            if (methodInfo != null)
-                            {
-                                if (!methodInfo.IsStatic)
-                                    instance = Activator.CreateInstance(slMeta);
-
-                                object[] parameters = { this }; // Put the runtime as parameter so the library can interact with the runtime
-
-                                // Finally, invoke 'LibLoad' and check the result
-                                bool result = (bool)methodInfo.Invoke(instance, parameters);
-                                if (!result)
-                                    throw new($"The SLang library '{a.GetName().Name}' failed to load.");
-                            }
-                            else
-                            {
-                                throw new($"Function 'LibLoad' isn't found in type '{slMeta.FullName}'");
-                            }
-                        }
-
-                        // Say the library has been loaded, then exit this method.
-                        Debug.WriteLine($"slrt: Loaded '{a.GetName().Name}', version {a.GetName().Version.ToString()}");
-                        return null;
-                    }
-                    catch (Exception e)
-                    {
-                        throw new($"Failed assembly loading: {e.GetType().Name}: {e.Message}");
-                    }
+                    string name = (string)args[0];
+                    return Loader.Load(this, name);
                 }
             }
 
             throw new("Invalid arguments");
-
-            return null;
         }
 
         private object PrintRTContent(object[] args)
@@ -517,15 +516,15 @@ namespace SLang.Runtime
             Console.WriteLine("SLang Runtime\n\nVariables:");
             foreach (var v in Variables)
             {
-                if (v.Value != null) 
-                { 
+                if (v.Value != null)
+                {
                     Type t = v.Value.GetType();
                     if (t == typeof(int))
-                        Console.WriteLine($"name: {v.Key}, type: {t.FullName}, value: {v.Value} (hex: 0x{((int)v.Value).ToString("X")})");
+                        Console.WriteLine($"name: {v.Name}, type: {v.Type.FullName}, value: {v.Value} (hex: 0x{((int)v.Value).ToString("X")})");
                     else if (t.IsArray)
                     {
                         object[] array = (object[])v.Value;
-                        Console.Write($"name: {v.Key}, type: {t.FullName}, length: {array.Length}, values: ");
+                        Console.Write($"name: {v.Name}, type: {v.Type.FullName}, length: {array.Length}, values: ");
                         foreach (object av in array)
                         {
                             if (av != null)
@@ -536,11 +535,12 @@ namespace SLang.Runtime
                         Console.Write("\n");
                     }
                     else
-                        Console.WriteLine($"name: {v.Key}, type: {t.FullName}, value: {v.Value}");
+                        Console.WriteLine($"name: {v.Name}, type: {v.Type.FullName}, value: {v.Value}");
                 }
                 else
-                    Console.WriteLine($"name: {v.Key}, type: System.Object, value: null");
+                    Console.WriteLine($"name: {v.Name}, type: System.Object, value: null");
             }
+
             foreach (var v in Functions)
             {
                 Console.WriteLine($"name: {v.Key}, type: func, value: 0x{v.Value.Method.MethodHandle.Value.ToInt64().ToString("X")}");

@@ -6,7 +6,7 @@
 
 SLang is a simple, yet powerful, programming language designed for ease-of-use and rapid development. This documentation will guide you through his core features and functionalities.
 
-This documentation has been wrote for the runtime v0.7.0
+This documentation has been wrote for the runtime v0.6.0
 
 ---
 
@@ -22,7 +22,6 @@ This documentation has been wrote for the runtime v0.7.0
 - [Built-in Functions](#built-in-functions)
 - [Comments](#comments)
 - [External Libraries](#external-libraries)
-- [DotNET type loading](#dotnet-type-loading)
 
 ---
 
@@ -211,7 +210,6 @@ SLang supports loading CIL libraries since runtime version 0.6.0.
 
 ```cs
 using SLang.Runtime;
-using SLang.Runtime.Types;
 
 namespace SLang.TestLibrary
 {
@@ -219,7 +217,7 @@ namespace SLang.TestLibrary
     {
         public bool LibLoad(SLRuntime rt)
         {
-            rt.Variables.SetKeyValue("newvar", "Library sucessfully loaded!");
+            rt.Variables["newvar"] = "Library sucessfully loaded!";
 
             return true;
         }
@@ -238,16 +236,28 @@ This example will load the "SLang.TestLibrary.dll" file contained in the same di
 
 ---
 
-## DotNET type loading
-SLang supports loading types from loaded assemblies since runtime version 0.7.0.
+## Example Code
 
-This uses the same function as for external library loading.
+Here's an example code snippet that shows off various SLang features:
 
-Example in the SLang REPL: `>>> load("System.Environment");`
+```c
+// Declare variables
+int a = 10;
+float b = 20.5;
+string name = "SLang";
 
-This example will import the variables & functions of the `System.Environment` class. (type defined in `System.dll`)
+// Arithmetic
+int sum = a + 5;
 
----
+// Control Flow
+if (sum > 10) {
+    printc("Sum is greater than 10. Actual sum: ", sum);
+} else {
+    printc("Sum is less than or equal to 10. Actual sum: ", sum);
+};
 
-## Conclusion
+// Function call
+printrt();
+```
+
 That should give you a good starting point for understanding the core functionalities of SLang.

@@ -1,4 +1,5 @@
 ﻿using SLang.Runtime;
+using SLang.Runtime.Types;
 
 namespace SLang.TestLibrary
 {
@@ -6,7 +7,7 @@ namespace SLang.TestLibrary
     {
         public bool LibLoad(SLRuntime rt)
         {
-            rt.Variables["newvar"] = "Library sucessfully loaded!";
+            rt.Variables.SetKeyValue("newvar", "Library sucessfully loaded!");
 
             return true;
         }
