@@ -13,6 +13,7 @@ This documentation has been wrote for the runtime v0.6.0
 ## Table of Contents
 
 - [Data Types](#data-types)
+- [SLang Files](#slang-files)
 - [Common Language Design](#common-language-design)
 - [Variables](#variables)
 - [Operators](#operators)
@@ -31,8 +32,21 @@ SLang supports the following data types:
 - 32-bit signed integer (System.Int32)
 - Single-precision floating point (System.Single) (Values defined in this type must finish by 'F' or 'f')
 - Double-precision floating point (System.Double) (Values defined in this type must finish by 'D' or 'd')
+- Array of anything said here (System.Object[])
 - UTF-16 text (System.String)
 - Boolean
+- Null
+
+NOTE : The SLang runtime & external libraries can define variables of types who isn't said here.
+
+---
+
+## SLang Files
+SLang support running files containing SLang code.
+
+NOTE : SLang doesn't care about the file extension
+
+To do that, drag & drop a file containing SLang code into the SLang REPL executable
 
 ---
 
@@ -83,7 +97,7 @@ int result = 10 + 20;
 
 ## Control Flow
 
-SLang supports `if`, `else` and `while` statements.
+SLang supports `if`, `else`, `while`, `for` & `foreach` statements.
 
 - **If Statement**
 
@@ -109,6 +123,22 @@ if (condition) {
 while (condition) {
     // Do something
 };
+```
+
+- **For Loop**
+
+```c
+for (num = 0; num < 8; num = num + 1) {
+    // Do something
+}
+```
+
+- **Foreach Loop**
+
+```c
+foreach (num in numarray) {
+    // Do something
+}
 ```
 
 ---
@@ -148,6 +178,7 @@ SLang offers built-in functions for common operations.
 
 - `printrt()`: Displays the runtime context.
 - `printc(arg1, arg2, ...)`: Concatenates and prints multiple arguments.
+- `load(path)`: Load a CIL library (see [this](#external-libraries)).
 
 Example:
 
@@ -173,7 +204,7 @@ SLang supports single-line comments with `//`.
 ---
 
 ## External Libraries
-SLang supports library loading since runtime version 0.6.0.
+SLang supports loading CIL libraries since runtime version 0.6.0.
 
 ### To make a library for S#, make a new C# class library with .NET 6 as framework, then add a class called "SLMetadata", and a dependency for "SLang.Runtime.dll" and put this code inside :
 
@@ -198,7 +229,7 @@ Then, you can change the code inside LibLoad, and interact with the runtime inst
 
 NOTE: Libraries can also be built with any CIL-compilant languages, but we won't show the example for those languages.
 
-### To load a library in SLang, use the 'load()' function to load a CIL library, and it will do everything needed.
+### To load a library in SLang, use the 'load()' function, and it will do everything needed.
 Example in the SLang REPL: `>>> load("SLang.TestLibrary.dll");`
 
 This example will load the "SLang.TestLibrary.dll" file contained in the same directory as `SLang.exe`.

@@ -1,0 +1,47 @@
+﻿<ui:FluentWindow
+        x:Class="SiCode.IDE.SettingsWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml" 
+        xmlns:localoptns="clr-namespace:SiCode.IDE.OptionsPages"
+        mc:Ignorable="d"
+        ExtendsContentIntoTitleBar="True"
+        WindowBackdropType="Mica"
+        Title="SettingsWindow" Height="450" Width="800">
+    <Grid>
+        <ui:TitleBar Height="48" Title="Settings" x:Name="TitleBar"/>
+        <ui:NavigationView FrameMargin="0, 48, 0, 0">
+            <ui:NavigationView.MenuItems>
+                <ui:NavigationViewItem Content="Theming">
+                    <ui:NavigationViewItem.Icon>
+                        <ui:SymbolIcon Symbol="PaintBrush20"/>
+                    </ui:NavigationViewItem.Icon>
+                </ui:NavigationViewItem>
+                <ui:NavigationViewItem Content="Text Editor">
+                    <ui:NavigationViewItem.Icon>
+                        <ui:SymbolIcon Symbol="Edit20" />
+                    </ui:NavigationViewItem.Icon>
+                </ui:NavigationViewItem>
+                <ui:NavigationViewItem Content="Behavior">
+                    <ui:NavigationViewItem.Icon>
+                        <ui:SymbolIcon Symbol="Settings20" />
+                    </ui:NavigationViewItem.Icon>
+                </ui:NavigationViewItem>
+                <ui:NavigationViewItem Content="O. Components">
+                    <ui:NavigationViewItem.Icon>
+                        <ui:SymbolIcon Symbol="Box20" />
+                    </ui:NavigationViewItem.Icon>
+                </ui:NavigationViewItem>
+            </ui:NavigationView.MenuItems>
+            <ui:NavigationView.FooterMenuItems>
+                <ui:NavigationViewItem Content="About" TargetPageType="{x:Type localoptns:AboutPage}">
+                    <ui:NavigationViewItem.Icon>
+                        <ui:SymbolIcon Symbol="Info20"/>
+                    </ui:NavigationViewItem.Icon>
+                </ui:NavigationViewItem>
+            </ui:NavigationView.FooterMenuItems>
+        </ui:NavigationView>
+    </Grid>
+</ui:FluentWindow>

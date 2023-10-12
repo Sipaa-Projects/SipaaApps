@@ -144,7 +144,7 @@ namespace SLang.Runtime
 
         public bool IsConditionTrue(string condition)
         {
-            Debug.WriteLine($"slrt: IwConditionTrue? '{condition}'");
+            Debug.WriteLine($"slrt: IsConditionTrue? '{condition}'");
             bool negate = false;
 
             // Check for negation

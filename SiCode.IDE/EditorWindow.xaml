@@ -1,0 +1,104 @@
+﻿<ui:FluentWindow x:Class="SiCode.IDE.EditorWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:SiCode.IDE"
+        xmlns:edit="http://icsharpcode.net/sharpdevelop/avalonedit"        
+        xmlns:Text="clr-namespace:System.Text;assembly=mscorlib" 
+        xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+        mc:Ignorable="d"
+        ExtendsContentIntoTitleBar="True"
+        WindowBackdropType="Mica"
+        WindowStartupLocation="CenterScreen"
+        Title="EditorWindow" Height="450" Width="800">
+    <Grid>
+        <ui:TitleBar HorizontalAlignment="Stretch" VerticalAlignment="Top" Margin="232, 0, 0, 0"/>
+        <Grid HorizontalAlignment="Left" VerticalAlignment="Top" Width="558" Height="48" Margin="16, 0, 0, 0">
+            <Image Width="16" Height="16" HorizontalAlignment="Left" Margin="0, 8" Source="sicode.ico"/>
+            <Menu x:Name="menu" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="24,0,0,0" Width="200" Height="48" Background="Transparent">
+                <ui:MenuItem ToolTip="File">
+                    <ui:MenuItem.Icon>
+                        <ui:SymbolIcon Symbol="Document24"/>
+                    </ui:MenuItem.Icon>
+                    <ui:MenuItem Header="New...">
+                        <ui:MenuItem.Icon>
+                            <ui:SymbolIcon Symbol="New20"/>
+                        </ui:MenuItem.Icon>
+                    </ui:MenuItem>
+                    <ui:MenuItem Header="Open...">
+                        <ui:MenuItem.Icon>
+                            <ui:SymbolIcon Symbol="Document20"/>
+                        </ui:MenuItem.Icon>
+                    </ui:MenuItem>
+                    <ui:MenuItem Header="Save program...">
+                        <ui:MenuItem.Icon>
+                            <ui:SymbolIcon Symbol="Save20"/>
+                        </ui:MenuItem.Icon>
+                    </ui:MenuItem>
+                    <ui:MenuItem Header="Return to home" Click="MenuItem_Click">
+                        <ui:MenuItem.Icon>
+                            <ui:SymbolIcon Symbol="Home20"/>
+                        </ui:MenuItem.Icon>
+                    </ui:MenuItem>
+                </ui:MenuItem>
+                <ui:MenuItem x:Name="cMenu" ToolTip="Compiler">
+                    <ui:MenuItem.Icon>
+                        <ui:SymbolIcon Symbol="PuzzleCube24"/>
+                    </ui:MenuItem.Icon>
+                    <ui:MenuItem x:Name="cMenu1" Header="Compile">
+                        <ui:MenuItem.Icon>
+                            <ui:SymbolIcon Symbol="PuzzleCube20"/>
+                        </ui:MenuItem.Icon>
+                    </ui:MenuItem>
+                    <ui:MenuItem x:Name="cMenu2" Header="Run">
+                        <ui:MenuItem.Icon>
+                            <ui:SymbolIcon Symbol="Play20"/>
+                        </ui:MenuItem.Icon>
+                    </ui:MenuItem>
+                    <ui:MenuItem x:Name="cMenu3" Header="Last compile errors">
+                        <ui:MenuItem.Icon>
+                            <ui:SymbolIcon Symbol="ErrorCircle20"/>
+                        </ui:MenuItem.Icon>
+                    </ui:MenuItem>
+                    <ui:MenuItem x:Name="cMenu4" Header="Last compile logs">
+                        <ui:MenuItem.Icon>
+                            <ui:SymbolIcon Symbol="Text16"/>
+                        </ui:MenuItem.Icon>
+                    </ui:MenuItem>
+                    <ui:MenuItem x:Name="cMenu5" Header="Referenced Assemblies">
+                        <ui:MenuItem.Icon>
+                            <ui:SymbolIcon Symbol="List20"/>
+                        </ui:MenuItem.Icon>
+                    </ui:MenuItem>
+                </ui:MenuItem>
+                <ui:MenuItem ToolTip="Options">
+                    <ui:MenuItem.Icon>
+                        <ui:SymbolIcon Symbol="Settings24"/>
+                    </ui:MenuItem.Icon>
+                    <ui:MenuItem Header="Download optional components">
+                        <ui:MenuItem.Icon>
+                            <ui:SymbolIcon Symbol="ArrowDownload20"/>
+                        </ui:MenuItem.Icon>
+                    </ui:MenuItem>
+                    <ui:MenuItem Header="Settings" Click="MenuItem_Click_1">
+                        <ui:MenuItem.Icon>
+                            <ui:SymbolIcon Symbol="Settings20"/>
+                        </ui:MenuItem.Icon>
+                    </ui:MenuItem>
+                </ui:MenuItem>
+                <ui:MenuItem ToolTip="Ask ChatGPT">
+                    <ui:MenuItem.Icon>
+                        <ui:SymbolIcon Symbol="Question20"/>
+                    </ui:MenuItem.Icon>
+                </ui:MenuItem>
+            </Menu>
+        </Grid>
+        <edit:TextEditor FontFamily="Cascadia Mono" ShowLineNumbers="True" Margin="0, 48, 0, 0" Background="#80060606">
+            <edit:TextEditor.Encoding>
+                <Text:UTF8Encoding/>
+            </edit:TextEditor.Encoding>
+            hello world
+        </edit:TextEditor>
+    </Grid>
+</ui:FluentWindow>

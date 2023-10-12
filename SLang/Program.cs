@@ -23,7 +23,7 @@ namespace SLang
 
     class Program
     {
-        static bool Verbose = true;
+        static bool Verbose = false; // Enable that for debugging purposes only
         static SLRuntime rt;
 
         static void Main(string[] args)
@@ -101,7 +101,7 @@ namespace SLang
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error: {ex.Message}\n{ex.StackTrace}");
+                Console.WriteLine($"Error: {ex.GetType().FullName}: {ex.Message}\n{ex.StackTrace}");
                 ExecuteREPL();
             }
         }
