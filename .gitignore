@@ -166,6 +166,9 @@ AutoTest.Net/
 # Installshield output folder
 [Ee]xpress/
 
+# Inno Setup output folder
+[Ss]etup/[Oo]utput/
+
 # DocProject is a documentation generator add-in
 DocProject/buildhelp/
 DocProject/Help/*.HxT
@@ -361,3 +364,4 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+/SLang/setup/Output
