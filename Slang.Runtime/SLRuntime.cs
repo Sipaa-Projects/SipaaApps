@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using System.Reflection;
 using System.Text;
 
 namespace SLang.Runtime
@@ -21,6 +22,7 @@ namespace SLang.Runtime
 
             Functions["printrt"] = PrintRTContent;
             Functions["printc"] = PrintConcat;
+            Functions["load"] = Load;
         }
 
         ~SLRuntime()
@@ -344,6 +346,77 @@ namespace SLang.Runtime
         // ----------------------
         // Core Functions
         // ----------------------
+        private object Load(object[] args)
+        {
+            if (args.Length > 0)
+            {
+                if (args[0].GetType() == typeof(string))
+                {
+                    try
+                    {
+                        // Path checks
+                        string path = (string)args[0];
+                        Debug.WriteLine($"slrt: Starting loading of assembly '{path}'.");
+                        if (!path.Contains(":\\")) {
+                            Debug.WriteLine("slrt: Path isn't absolute, making it absolute.");
+                            path = AppDomain.CurrentDomain.BaseDirectory + path;
+                            Debug.WriteLine($"slrt: Path became '{path}'.");
+                        }
+
+                        Assembly a = Assembly.LoadFile(path);
+                        bool IsSLLib = false;
+                        Type slMeta = null;
+
+                        // Check if it's a SLang library
+                        foreach (Type type in a.GetTypes())
+                        {
+                            if (type.Name == "SLMetadata")
+                            {
+                                IsSLLib = true;
+                                slMeta = type;
+                                Debug.WriteLine($"slrt: S# Library detected! Library metadata type: {slMeta.FullName}");
+                            }
+                        }
+
+                        // If it's a SLang library, then try running the function to load it
+                        if (IsSLLib && slMeta != null)
+                        {
+                            object instance = null;
+                            MethodInfo methodInfo = slMeta.GetMethod("LibLoad");
+                            if (methodInfo != null)
+                            {
+                                if (!methodInfo.IsStatic)
+                                    instance = Activator.CreateInstance(slMeta);
+
+                                object[] parameters = { this }; // Put the runtime as parameter so the library can interact with the runtime
+
+                                // Finally, invoke 'LibLoad' and check the result
+                                bool result = (bool)methodInfo.Invoke(instance, parameters);
+                                if (!result)
+                                    throw new($"The SLang library '{a.GetName().Name}' failed to load.");
+                            }
+                            else
+                            {
+                                throw new($"Function 'LibLoad' isn't found in type '{slMeta.FullName}'");
+                            }
+                        }
+
+                        // Say the library has been loaded, then exit this method.
+                        Debug.WriteLine($"slrt: Loaded '{a.GetName().Name}', version {a.GetName().Version.ToString()}");
+                        return null;
+                    }
+                    catch (Exception e)
+                    {
+                        throw new($"Failed assembly loading: {e.GetType().Name}: {e.Message}");
+                    }
+                }
+            }
+
+            throw new("Invalid arguments");
+
+            return null;
+        }
+
         private object PrintRTContent(object[] args)
         {
             Console.WriteLine("SLang Runtime\n\nVariables:");
@@ -354,6 +427,19 @@ namespace SLang.Runtime
                     Type t = v.Value.GetType();
                     if (t == typeof(int))
                         Console.WriteLine($"name: {v.Key}, type: {t.FullName}, value: {v.Value} (hex: 0x{((int)v.Value).ToString("X")})");
+                    else if (t.IsArray)
+                    {
+                        object[] array = (object[])v.Value;
+                        Console.Write($"name: {v.Key}, type: {t.FullName}, length: {array.Length}, values: ");
+                        foreach (object av in array)
+                        {
+                            if (av != null)
+                                Console.Write(av + " ");
+                            else
+                                Console.Write("null ");
+                        }
+                        Console.Write("\n");
+                    }
                     else
                         Console.WriteLine($"name: {v.Key}, type: {t.FullName}, value: {v.Value}");
                 }

@@ -59,6 +59,12 @@ namespace SLang.Runtime
             var trimmedValue = valueString.Trim();
             Debug.WriteLine($"slrt: Trying parsing value `{trimmedValue}`");
 
+            if (trimmedValue.StartsWith("[") && trimmedValue.EndsWith("]"))
+            {
+                var items = trimmedValue.Substring(1, trimmedValue.Length - 2).Split(',');
+                return items.Select(item => ParseValue(item.Trim())).ToArray();
+            }
+
             // Check if the value contains expressions
             if (trimmedValue.Contains('+') || trimmedValue.Contains('-') || trimmedValue.Contains('*') || trimmedValue.Contains('/'))
                 return EvaluateExpression(trimmedValue);
@@ -109,20 +115,36 @@ namespace SLang.Runtime
             }
             throw new("Block extraction failed. Invalid statement syntax.");
         }
-
-        public string ExtractCondition(string statement)
+        public string ExtractCondition(string ifStatement)
         {
-            int start = statement.IndexOf('(');
-            int end = statement.IndexOf(')');
-            if (start != -1 && end != -1)
+            int startPos = ifStatement.IndexOf('(') + 1;
+            int endPos = ifStatement.LastIndexOf(')');
+
+            // Use a stack to handle nested parentheses
+            Stack<char> parenStack = new Stack<char>();
+            for (int i = startPos; i <= endPos; i++)
             {
-                return statement.Substring(start + 1, end - start - 1).Trim();
+                if (ifStatement[i] == '(')
+                {
+                    parenStack.Push('(');
+                }
+                else if (ifStatement[i] == ')')
+                {
+                    if (parenStack.Count == 0)
+                    {
+                        endPos = i;
+                        break;
+                    }
+                    parenStack.Pop();
+                }
             }
-            throw new("Condition extraction failed. Invalid statement syntax.");
+
+            return ifStatement.Substring(startPos, endPos - startPos).Trim();
         }
 
         public bool IsConditionTrue(string condition)
         {
+            Debug.WriteLine($"slrt: IwConditionTrue? '{condition}'");
             bool negate = false;
 
             // Check for negation
@@ -191,6 +213,18 @@ namespace SLang.Runtime
                         return negate ? (i == 0) : (i != 0);
                     }
                     // Add more type checks as needed
+                }
+                if (parentRuntime.IsFunctionCall(condition))
+                {
+                    object val = parentRuntime.ExecuteFunction(condition);
+                    if (val is bool b)
+                    {
+                        return negate ? !b : b;
+                    }
+                    else if (val is int i)
+                    {
+                        return negate ? (i == 0) : (i != 0);
+                    }
                 }
             };
 

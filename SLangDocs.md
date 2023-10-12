@@ -6,7 +6,7 @@
 
 SLang is a simple, yet powerful, programming language designed for ease-of-use and rapid development. This documentation will guide you through his core features and functionalities.
 
-This documentation has been wrote for the runtime v0.5.1
+This documentation has been wrote for the runtime v0.6.0
 
 ---
 
@@ -20,6 +20,7 @@ This documentation has been wrote for the runtime v0.5.1
 - [Functions](#functions)
 - [Built-in Functions](#built-in-functions)
 - [Comments](#comments)
+- [External Libraries](#external-libraries)
 
 ---
 
@@ -161,13 +162,46 @@ Hello world!
 
 ---
 
-#### Comments
+## Comments
 
 SLang supports single-line comments with `//`.
 
 ```c
 // This is a comment
 ```
+
+---
+
+## External Libraries
+SLang supports library loading since runtime version 0.6.0.
+
+### To make a library for S#, make a new C# class library with .NET 6 as framework, then add a class called "SLMetadata", and a dependency for "SLang.Runtime.dll" and put this code inside :
+
+```cs
+using SLang.Runtime;
+
+namespace SLang.TestLibrary
+{
+    public class SLMetadata
+    {
+        public bool LibLoad(SLRuntime rt)
+        {
+            rt.Variables["newvar"] = "Library sucessfully loaded!";
+
+            return true;
+        }
+    }
+}
+```
+
+Then, you can change the code inside LibLoad, and interact with the runtime instance. (defined as 'rt' in this example)
+
+NOTE: Libraries can also be built with any CIL-compilant languages, but we won't show the example for those languages.
+
+### To load a library in SLang, use the 'load()' function to load a CIL library, and it will do everything needed.
+Example in the SLang REPL: `>>> load("SLang.TestLibrary.dll");`
+
+This example will load the "SLang.TestLibrary.dll" file contained in the same directory as `SLang.exe`.
 
 ---
 
